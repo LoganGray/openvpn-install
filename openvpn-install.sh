@@ -436,7 +436,8 @@ verb 3" > /etc/openvpn/server/client-common.txt
 	echo "The client configuration is available in:" ~/"$client.ovpn"
 	echo "New clients can be added by running this script again."
 else
-	clear
+	# clear
+	function askOptions() {
 	echo "OpenVPN is already installed."
 	echo
 	echo "Select an option:"
@@ -564,4 +565,44 @@ else
 			exit
 		;;
 	esac
+	}
+
+function addUser ()
+{
+			username2be=$1
+
+			echo "I think username is going to be $username2be"
+			TMPDATE="_2022_08-08"
+			unsanitized_client="$username2be$TMPDATE"
+		
+			# read -p "Name: " unsanitized_client
+			client=$(sed 's/[^0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_-]/_/g' <<< "$unsanitized_client")
+			while [[ -z "$client" || -e /etc/openvpn/server/easy-rsa/pki/issued/"$client".crt ]]; do
+				echo "$client: invalid name."
+				read -p "Name: " unsanitized_client
+				client=$(sed 's/[^0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_-]/_/g' <<< "$unsanitized_client")
+			done
+			cd /etc/openvpn/server/easy-rsa/
+			EASYRSA_CERT_EXPIRE=3650 ./easyrsa build-client-full "$client" nopass
+			# Generates the custom client.ovpn
+			new_client
+			echo
+			echo "$client added. Configuration available in:" ~/"$client.ovpn"
+			exit
+		
+}
+
+if [ $# -eq 0 ]
+  then
+    echo "No arguments supplied"
+	askOptions
+	exit 1
+fi
+if [ $# -eq 1 ]
+  then
+    addUser $$1
+	exit 1
+fi
+
+
 fi
