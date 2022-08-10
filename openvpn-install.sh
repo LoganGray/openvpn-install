@@ -656,7 +656,7 @@ fi
 if [ $# -eq 2 ] && [ $1 == "removebatch" ]
   then
 	tail -n +2 /etc/openvpn/server/easy-rsa/pki/index.txt | grep "^V" | cut -d '=' -f 2 | nl -s ') '
-	echo "Removing a batch of users... essentailly 1 to $2"
+	echo "Removing a batch of users... essentially 1 to $2"
 	while true; do
 
 	read -p "Are you absolutely sure? (yes/no) " yn
